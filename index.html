@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live TV with Clappr Player</title>
+  <script src="https://cdn.jsdelivr.net/npm/@clappr/player@latest/dist/clappr.min.js"></script>
+  <style>
+    body{
+        font-family: Arial, Helvetica, sans-serif;
+        background-color: gray;
+    }
+
+    p{
+      margin: 0px;
+    }
+    .channel {
+      display: inline-block;
+      margin-top: 20px;
+      text-align: center;
+      margin-left: 10px;
+      width: 150px;
+      height: 135px;
+      background-color: rgb(84, 84, 84);
+      border-radius: 10px;
+      box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+      
+    }
+    .channel img {
+      width: 120px;
+      height: 80px;
+      border-radius: 10px;
+      margin-top: 10px;
+      
+    }
+    
+    .player-container {
+      margin-top: 20px;
+    }
+
+    
+
+    .container{
+        display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      vertical-align: top;
+    }
+
+    .main{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        
+    }
+
+    button{
+      color: red;
+      background: white;
+      width: 120px;
+      height: 25px;
+      margin-top: 5px;
+      border-radius: 3px;
+      border: none;
+      transition: 0.5s;
+      cursor: pointer;
+    }
+
+    button:hover{
+      color: white;
+      background-color: red;
+    }
+
+    @media (max-width: 480px) {
+      .channel img {
+      width: 100px;
+      height: 80px;
+      border-radius: 10px;
+      margin-top: 10px;
+      
+    } 
+
+    .channel {
+      margin-left: 15px;
+      width: 118px;
+      height: 135px;
+      margin-top: 10px;
+      
+    }
+
+    button{
+      width: 100px;
+    }
+
+    
+
+    
+        }
+  </style>
+</head>
+<body>
+<div class="main">
+  <h1>Live TV Streaming</h1>
+
+  <div class="player-container">
+    <div id="player"></div>
+  </div>
+
+<div class="container">
+  <div id="channels"></div>
+
+</div>
+</div>
+  <script>
+    // Load M3U playlist and parse the data
+    async function loadPlaylist() {
+      const response = await fetch('playlist.m3u8'); // Update this with your playlist URL
+      const text = await response.text();
+      const lines = text.split('\n');
+      let channels = [];
+
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].startsWith("#EXTINF")) {
+          const name = lines[i].match(/,(.*)/)[1].trim();
+          const logo = lines[i].match(/tvg-logo="(.*?)"/)[1];
+          const url = lines[i + 1].trim();
+          channels.push({ name, logo, url });
+        }
+      }
+
+      const channelContainer = document.getElementById('channels');
+      channels.forEach(channel => {
+        const channelDiv = document.createElement('div');
+        channelDiv.className = 'channel';
+        channelDiv.innerHTML = `
+          <img src="${channel.logo}" alt="${channel.name}">
+          
+          <button onclick="playChannel('${channel.url}')">Watch Now</button>
+        `;
+        channelContainer.appendChild(channelDiv);
+      });
+    }
+
+    // Play the selected channel in Clappr player
+    function playChannel(streamUrl) {
+      const playerElement = document.getElementById('player');
+      playerElement.innerHTML = '';  // Clear previous player
+
+      const player = new Clappr.Player({
+        source: streamUrl,
+        parentId: '#player',
+        autoPlay: true,
+        height: '240px',
+        width: '360px'
+      });
+    }
+
+    loadPlaylist();
+  </script>
+
+</body>
+</html>
